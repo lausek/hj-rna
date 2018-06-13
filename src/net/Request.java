@@ -34,4 +34,14 @@ public class Request implements Serializable {
 		this.query = query;
 	}
 	
+	@Override
+	public String toString() {
+		switch (type) {
+		case SEARCH:
+			return String.format("%s in \"%s\" for \"%s\"", type.toString(), pool, query);
+		default:
+			return String.format("%s %s in \"%s\"", type.toString(), entryID, pool);
+		}
+	}
+	
 }

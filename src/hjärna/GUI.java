@@ -2,6 +2,9 @@ package hjärna;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.IOException;
@@ -28,20 +31,27 @@ public class GUI extends JFrame implements KeyListener {
 	private static final long serialVersionUID = -6306066100675358193L;
 
 	private Socket socket;
+	private ObjectOutputStream requestStream;
+	private ObjectInputStream responseStream;
+	
 	private JTextField searchFor;
 	private JList<Entry> resultBox;
 
 	public GUI() {
 		try {
 			socket = new Socket(Server.host, Server.port);
+			requestStream = new ObjectOutputStream(socket.getOutputStream());
+			responseStream = new ObjectInputStream(socket.getInputStream());
 		} catch (IOException e) {
 			// TODO: server not available
 			e.printStackTrace();
 			return;
 		}
-
+		
+		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+		
 		setTitle(WINDOW_TITLE);
-		setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+		setBounds(screen.width/2-WINDOW_WIDTH/2, screen.height/2-WINDOW_HEIGHT/2, WINDOW_WIDTH, WINDOW_HEIGHT);
 		setLayout(new BorderLayout());
 		
 		initializePanel();
@@ -52,6 +62,7 @@ public class GUI extends JFrame implements KeyListener {
 	private void initializePanel() {
 		searchFor = new JTextField();
 		searchFor.addKeyListener(this);
+		searchFor.setMargin(new Insets(5, 5, 5, 5));
 		
 		resultBox = new JList<>();
 		resultBox.setCellRenderer(new ListCellRenderer<Entry>() {
@@ -67,10 +78,7 @@ public class GUI extends JFrame implements KeyListener {
 	}
 
 	private void send() {
-		try {
-			ObjectOutputStream requestStream = new ObjectOutputStream(socket.getOutputStream());
-			ObjectInputStream responseStream = new ObjectInputStream(socket.getInputStream());
-					
+		try {		
 			Request request = new Request();
 			request.setQuery(searchFor.getText());
 			requestStream.writeObject(request);
@@ -83,7 +91,6 @@ public class GUI extends JFrame implements KeyListener {
 				updateResults.add(new Entry(line));
 			}
 			resultBox.setListData(updateResults);
-			
 		} catch (ClassNotFoundException | IOException e) {
 			e.printStackTrace();
 		}

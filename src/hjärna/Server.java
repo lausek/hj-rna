@@ -23,19 +23,19 @@ public class Server {
 	private Map<String, SearchPool> pools;
 
 	public Server() throws UnknownHostException, IOException {
-		logger = new Logger("server.log");
+		logger = new Logger(Control.CONFIG_PATH + "/server.log");
 		socket = new ServerSocket(port);
 		pools = new HashMap<>();
-		
+
 		loadPools();
-		
+
 		handle();
 	}
 
 	private void loadPools() {
 		// TODO: load pools
 	}
-	
+
 	private List<String> search(Request request) {
 		List<String> found = new java.util.ArrayList<>();
 		found.add("here");
@@ -55,7 +55,9 @@ public class Server {
 				e.printStackTrace();
 				continue;
 			}
-
+			
+			logger.put("Client connected");
+			
 			try {
 				ObjectInputStream requestStream = new ObjectInputStream(client.getInputStream());
 				ObjectOutputStream responseStream = new ObjectOutputStream(client.getOutputStream());

@@ -71,7 +71,7 @@ public class Control {
 			new GUI();
 			break;
 		}
-
+		
 	}
 
 }
