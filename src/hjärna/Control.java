@@ -1,10 +1,15 @@
 package hjärna;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 public class Control {
 
+	public static final String CONFIG_PATH = "~/.hjaerna/";
+
+	// command line flags
 	private static final int C_ARG_SPAWN = 1;
 	private static final int C_ARG_FORCE = 2;
 
@@ -13,18 +18,23 @@ public class Control {
 		if (!command.isPresent()) {
 			return false;
 		}
-		return ProcessHandle
-				.allProcesses()
-				.anyMatch(process -> {
-					Optional<String> running = process.info().command();
-					if (!running.isPresent()) {
-						return false;
-					}
-					return command.get().equals(running.get());
-				});
+		return ProcessHandle.allProcesses().anyMatch(process -> {
+			Optional<String> running = process.info().command();
+			if (!running.isPresent()) {
+				return false;
+			}
+			return command.get().equals(running.get());
+		});
 	}
-	
-	public static void main(String[] args) {
+
+	private static void initializeConfig() throws IOException {
+		Path directory = Paths.get(CONFIG_PATH);
+		if (!directory.toFile().exists() || directory.toFile().isFile()) {
+			// TODO: create config dir
+		}
+	}
+
+	public static void main(String[] args) throws IOException {
 
 		int spawnServer = 0;
 
@@ -33,13 +43,15 @@ public class Control {
 			case "--spawn":
 				spawnServer |= C_ARG_SPAWN;
 				break;
-				
+
 			case "--force":
 				spawnServer |= C_ARG_FORCE;
 				break;
 			}
 		}
-		
+
+		initializeConfig();
+
 		switch (spawnServer) {
 		case 1:
 			if (serverIsRunning()) {
@@ -54,12 +66,12 @@ public class Control {
 				e.printStackTrace();
 			}
 			break;
-			
+
 		default:
 			new GUI();
 			break;
 		}
-		
+
 	}
 
 }

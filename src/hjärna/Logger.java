@@ -23,8 +23,7 @@ public class Logger {
 	}
 	
 	public void put(String msg, Level level) {
-		// TODO: implement
-		System.out.println(msg);
+		System.out.printf("[] %s: %s", level.toString(), msg);
 	}
 	
 	@Override
