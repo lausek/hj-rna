@@ -10,6 +10,7 @@ public class Request implements Serializable {
 		CHANGE,
 		DELETE,
 		EXECUTE,
+		INIT,
 	};
 	
 	private static final long serialVersionUID = -1715424764982519859L;

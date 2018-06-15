@@ -15,10 +15,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 
@@ -36,8 +41,10 @@ public class GUI extends JFrame implements KeyListener {
 	private Socket socket;
 	private ObjectOutputStream requestStream;
 	private ObjectInputStream responseStream;
-	
-	private JTextField searchFor;
+
+	private List<String> poolList;
+	private JTextField searchQuery;
+	private JComboBox<Object> searchPool;
 	private JList<Entry> resultBox;
 
 	public GUI() {
@@ -45,16 +52,18 @@ public class GUI extends JFrame implements KeyListener {
 			socket = new Socket(Server.host, Server.port);
 			requestStream = new ObjectOutputStream(socket.getOutputStream());
 			responseStream = new ObjectInputStream(socket.getInputStream());
+			poolList = getPools();
 		} catch (IOException e) {
 			// TODO: server not available
 			e.printStackTrace();
 			return;
 		}
-		
+
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-		
+
 		setTitle(WINDOW_TITLE);
-		setBounds(screen.width/2-WINDOW_WIDTH/2, screen.height/2-WINDOW_HEIGHT/2, WINDOW_WIDTH, WINDOW_HEIGHT);
+		setBounds(screen.width / 2 - WINDOW_WIDTH / 2, screen.height / 2 - WINDOW_HEIGHT / 2, WINDOW_WIDTH,
+				WINDOW_HEIGHT);
 		setLayout(new BorderLayout());
 		addWindowListener(new WindowAdapter() {
 			@Override
@@ -67,17 +76,24 @@ public class GUI extends JFrame implements KeyListener {
 				}
 			}
 		});
-		
+
 		initializePanel();
-		
+
 		setVisible(true);
 	}
 
 	private void initializePanel() {
-		searchFor = new JTextField();
-		searchFor.addKeyListener(this);
-		searchFor.setMargin(new Insets(5, 5, 5, 5));
+		JPanel searchBox = new JPanel();
 		
+		searchPool = new JComboBox<>(poolList.toArray());
+
+		searchQuery = new JTextField();
+		searchQuery.addKeyListener(this);
+		searchQuery.setMargin(new Insets(5, 5, 5, 5));
+
+		searchBox.add(searchPool);
+		searchBox.add(searchQuery);
+
 		resultBox = new JList<>();
 		resultBox.setCellRenderer(new ListCellRenderer<Entry>() {
 			@Override
@@ -86,34 +102,51 @@ public class GUI extends JFrame implements KeyListener {
 				return entry;
 			}
 		});
-		
-		add(searchFor, BorderLayout.NORTH);
+
+		add(searchBox, BorderLayout.NORTH);
 		add(resultBox, BorderLayout.CENTER);
 	}
 
-	private void send() {
-		try {		
+	private List<String> getPools() {
+		try {
 			Request request = new Request();
-			request.setQuery(searchFor.getText());
-			requestStream.writeObject(request);
-			requestStream.flush();
-			
-			Response response = (Response) responseStream.readObject();
-			
-			Vector<Entry> updateResults = new Vector<>();
-			for (String line : response.results) {
-				updateResults.add(new Entry(line));
-			}
-			resultBox.setListData(updateResults);
-		} catch (ClassNotFoundException | IOException e) {
+			request.setType(Request.Type.INIT);
+			send(request);
+
+			Response response = receive();
+
+			return response.results;
+		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
+		return new ArrayList<>();
+	}
+
+	private Response receive() throws ClassNotFoundException, IOException {
+		return (Response) responseStream.readObject();
+	}
+
+	private void send(Request request) throws IOException {
+		requestStream.writeObject(request);
+		requestStream.flush();
 	}
 
 	@Override
 	public void keyTyped(KeyEvent arg0) {
-		if (1 < searchFor.getText().length()) {
-			send();
+		if (1 < searchQuery.getText().length()) {
+			Request request = new Request();
+			request.setQuery(searchQuery.getText());
+			try {
+				send(request);
+
+				Vector<Entry> updateResults = new Vector<>();
+				for (String line : receive().results) {
+					updateResults.add(new Entry(line));
+				}
+				resultBox.setListData(updateResults);
+			} catch (IOException | ClassNotFoundException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
