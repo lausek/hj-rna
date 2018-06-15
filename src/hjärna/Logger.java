@@ -41,7 +41,7 @@ public class Logger {
 	
 	public void put(String msg, Level level) {
 		Calendar calendar = Calendar.getInstance();
-		String formatted = String.format("[%s] %s: %s\n", dateFormat.format(calendar.getTime()), level.toString(), msg);
+		String formatted = String.format("[%s] %s: %s\r\n", dateFormat.format(calendar.getTime()), level.toString(), msg);
 		try {
 			stream.write(formatted.getBytes());
 		} catch (IOException e) {

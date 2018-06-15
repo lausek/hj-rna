@@ -74,7 +74,12 @@ public class Server {
 	}
 
 	private List<String> search(Request request) {
-		return pools.get(request.pool).search(request);
+		if (request.pool != null) {
+			return pools.get(request.pool).search(request);
+		} else {
+			String pool = pools.keySet().iterator().next();
+			return pools.get(pool).search(request);
+		}
 	}
 
 	private void cleanup() {
@@ -126,18 +131,21 @@ public class Server {
 						responseStream.writeObject(response);
 						responseStream.flush();
 					} catch (ClassNotFoundException | IOException e1) {
-						e1.printStackTrace();
+						logger.put(e1.getMessage(), Level.WARNING);
 						break;
 					}
 				} while (client.isConnected());
 
-				client.close();
-
 			} catch (IOException e) {
-				e.printStackTrace();
+				logger.put(e.getMessage(), Level.WARNING);
 				continue;
+			} finally {
+				try {
+					client.close();
+				} catch (IOException e) {
+				}
+				logger.put("Client disconnected...");
 			}
-
 		}
 		
 		cleanup();
