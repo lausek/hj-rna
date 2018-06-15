@@ -49,7 +49,7 @@ public class Parser {
 		if (chars.length < 3) {
 			return tokens;
 		}
-		
+
 		chars = Arrays.copyOfRange(chars, x, chars.length);
 
 		if (chars[0] == '[') {
@@ -70,14 +70,14 @@ public class Parser {
 				continue;
 
 			case '=':
-				tokens.add(new Pair<>(Token.NAME, buffer.trim()));
+				tokens.add(new Pair<>(Token.NAME, unpack(buffer)));
 				buffer = new String();
 
 				tokens.add(new Pair<>(Token.ASSIGN));
 				break;
 
 			case ']':
-				tokens.add(new Pair<>(Token.NAME, buffer.trim()));
+				tokens.add(new Pair<>(Token.NAME, unpack(buffer)));
 				buffer = new String();
 
 				if (i + 1 < chars.length && chars[i + 1] == ']') {
@@ -90,12 +90,16 @@ public class Parser {
 		}
 
 		if (!buffer.isEmpty()) {
-			tokens.add(new Pair<>(Token.NAME, buffer.trim()));
+			tokens.add(new Pair<>(Token.NAME, unpack(buffer)));
 		}
 
 		return tokens;
 	}
-
+	
+	private static String unpack(String buffer) {
+		return buffer.trim().replaceAll("\"", "");
+	}
+	
 	public static Map<String, Object> loadString(String content) throws FileNotFoundException, IOException {
 		Stack<Map<String, Object>> stack = new Stack<>();
 		Map<String, Object> config = new HashMap<>();
@@ -103,6 +107,10 @@ public class Parser {
 		List<Pair<Token, String>> tokens;
 		Pair<Token, String> first = null, second = null, third = null;
 		int currentIndent = 0;
+
+		if (content == null) {
+			return config;
+		}
 
 		stack.push(config);
 
@@ -187,11 +195,11 @@ public class Parser {
 	}
 
 	public static Map<String, Object> loadFile(Path file) throws FileNotFoundException, IOException {
-		String content = null, line;
+		String content = new String(), line;
 		try (Reader reader = new FileReader(file.toFile())) {
 			try (BufferedReader buffer = new BufferedReader(reader)) {
 				while ((line = buffer.readLine()) != null) {
-					content += line;
+					content += line + "\n";
 				}
 			}
 		}

@@ -7,12 +7,12 @@ import java.util.Optional;
 
 public class Control {
 
-	public static final String CONFIG_PATH = "~/.hjaerna/";
+	public static final String CONFIG_PATH = "/.hjaerna";
 
 	// command line flags
 	private static final int C_ARG_SPAWN = 1;
 	private static final int C_ARG_FORCE = 2;
-
+	
 	private static boolean serverIsRunning() {
 		Optional<String> command = ProcessHandle.current().info().command();
 		if (!command.isPresent()) {
@@ -28,12 +28,17 @@ public class Control {
 	}
 
 	private static void initializeConfig() throws IOException {
-		Path directory = Paths.get(CONFIG_PATH);
+		Path directory = Paths.get(Control.getConfigPath());
 		if (!directory.toFile().exists() || directory.toFile().isFile()) {
 			// TODO: create config dir
+			directory.toFile().mkdirs();
 		}
 	}
-
+	
+	public static String getConfigPath() {
+		return System.getProperty("user.home") + CONFIG_PATH;
+	}
+	
 	public static void main(String[] args) throws IOException {
 
 		int spawnServer = 0;
