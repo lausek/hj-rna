@@ -62,8 +62,7 @@ public class SearchPool implements Serializable {
 	}
 
 	private void loadFile(Map<String, Object> fileDescription) throws IOException {
-		String path;
-		String type;
+		String path, type;
 
 		if (!fileDescription.containsKey("path")) {
 			throw new IOException("File need path");

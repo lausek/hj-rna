@@ -74,7 +74,7 @@ public class GUI extends JFrame implements KeyListener {
 		});
 
 		initializePanel();
-		
+
 		setVisible(true);
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
@@ -92,7 +92,7 @@ public class GUI extends JFrame implements KeyListener {
 		c.insets = new java.awt.Insets(10, 10, 10, 10);
 		c.ipady = 5;
 		c.ipadx = 5;
-		
+
 		searchPool = new JComboBox<>(poolList.toArray());
 
 		searchQuery = new JTextField();
@@ -152,6 +152,7 @@ public class GUI extends JFrame implements KeyListener {
 		if (1 < searchQuery.getText().length()) {
 			Request request = new Request();
 			request.setQuery(searchQuery.getText());
+			request.setPool((String) searchPool.getModel().getSelectedItem());
 			try {
 				send(request);
 
