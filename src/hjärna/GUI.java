@@ -27,6 +27,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
+import javax.swing.SwingUtilities;
 
 import net.Request;
 import net.Response;
@@ -73,8 +74,14 @@ public class GUI extends JFrame implements KeyListener {
 		});
 
 		initializePanel();
-
+		
 		setVisible(true);
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				searchQuery.requestFocusInWindow();
+			}
+		});
 	}
 
 	private void initializePanel() {
