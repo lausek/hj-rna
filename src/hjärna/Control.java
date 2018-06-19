@@ -12,7 +12,7 @@ public class Control {
 	// command line flags
 	private static final int C_ARG_SPAWN = 1;
 	private static final int C_ARG_FORCE = 2;
-	
+
 	private static boolean serverIsRunning() {
 		Optional<String> command = ProcessHandle.current().info().command();
 		if (!command.isPresent()) {
@@ -27,19 +27,19 @@ public class Control {
 		});
 	}
 
-	private static void initializeConfig() throws IOException {
+	private static void initializeConfig() {
 		Path directory = Paths.get(Control.getConfigPath());
 		if (!directory.toFile().exists() || directory.toFile().isFile()) {
 			// TODO: create config dir
 			directory.toFile().mkdirs();
 		}
 	}
-	
+
 	public static String getConfigPath() {
 		return System.getProperty("user.home") + CONFIG_PATH;
 	}
-	
-	public static void main(String[] args) throws IOException {
+
+	public static void main(String[] args) {
 
 		int spawnServer = 0;
 
@@ -73,10 +73,14 @@ public class Control {
 			break;
 
 		default:
-			new GUI();
+			try {
+				new GUI();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			break;
 		}
-		
+
 	}
 
 }

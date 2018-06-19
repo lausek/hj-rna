@@ -3,18 +3,20 @@ package hjärna;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -23,7 +25,6 @@ import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 
@@ -34,7 +35,7 @@ public class GUI extends JFrame implements KeyListener {
 
 	public static final String WINDOW_TITLE = "hjärna";
 	public static final int WINDOW_WIDTH = 800;
-	public static final int WINDOW_HEIGHT = 100;
+	public static final int WINDOW_HEIGHT = 150;
 
 	private static final long serialVersionUID = -6306066100675358193L;
 
@@ -47,17 +48,11 @@ public class GUI extends JFrame implements KeyListener {
 	private JComboBox<Object> searchPool;
 	private JList<Entry> resultBox;
 
-	public GUI() {
-		try {
-			socket = new Socket(Server.host, Server.port);
-			requestStream = new ObjectOutputStream(socket.getOutputStream());
-			responseStream = new ObjectInputStream(socket.getInputStream());
-			poolList = getPools();
-		} catch (IOException e) {
-			// TODO: server not available
-			e.printStackTrace();
-			return;
-		}
+	public GUI() throws UnknownHostException, IOException {
+		socket = new Socket(Server.host, Server.port);
+		requestStream = new ObjectOutputStream(socket.getOutputStream());
+		responseStream = new ObjectInputStream(socket.getInputStream());
+		poolList = getPools();
 
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 
@@ -84,6 +79,12 @@ public class GUI extends JFrame implements KeyListener {
 
 	private void initializePanel() {
 		JPanel searchBox = new JPanel();
+		searchBox.setLayout(new GridBagLayout());
+
+		GridBagConstraints c = new GridBagConstraints();
+		c.insets = new java.awt.Insets(10, 10, 10, 10);
+		c.ipady = 5;
+		c.ipadx = 5;
 		
 		searchPool = new JComboBox<>(poolList.toArray());
 
@@ -91,8 +92,16 @@ public class GUI extends JFrame implements KeyListener {
 		searchQuery.addKeyListener(this);
 		searchQuery.setMargin(new Insets(5, 5, 5, 5));
 
-		searchBox.add(searchPool);
-		searchBox.add(searchQuery);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridy = 0;
+		c.gridx = 0;
+		searchBox.add(searchPool, c);
+
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridy = 0;
+		c.gridx = 1;
+		c.weightx = 1.0d;
+		searchBox.add(searchQuery, c);
 
 		resultBox = new JList<>();
 		resultBox.setCellRenderer(new ListCellRenderer<Entry>() {
