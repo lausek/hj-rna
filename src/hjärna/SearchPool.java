@@ -100,9 +100,10 @@ public class SearchPool implements Serializable {
 	}
 
 	public List<String> search(Request request) {
+		String query = request.query.toLowerCase();
 		return content
 				.stream()
-				.filter(line -> line.contains(request.query))
+				.filter(line -> line.toLowerCase().contains(query))
 				.collect(Collectors.toList());
 	}
 

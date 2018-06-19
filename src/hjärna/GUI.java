@@ -30,6 +30,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 import net.Request;
 import net.Response;
@@ -56,7 +57,11 @@ public class GUI extends JFrame implements KeyListener {
 		requestStream = new ObjectOutputStream(socket.getOutputStream());
 		responseStream = new ObjectInputStream(socket.getInputStream());
 		poolList = getPools();
-
+		
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {}
+		
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 
 		setTitle(WINDOW_TITLE);
