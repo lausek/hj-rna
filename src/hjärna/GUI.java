@@ -21,10 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingUtilities;
@@ -75,6 +77,7 @@ public class GUI extends JFrame implements KeyListener {
 
 		initializePanel();
 
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
@@ -119,8 +122,11 @@ public class GUI extends JFrame implements KeyListener {
 			}
 		});
 
+		JScrollPane scrollPane = new JScrollPane(resultBox);
+		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		
 		add(searchBox, BorderLayout.NORTH);
-		add(resultBox, BorderLayout.CENTER);
+		add(scrollPane, BorderLayout.CENTER);
 	}
 
 	private List<String> getPools() {
