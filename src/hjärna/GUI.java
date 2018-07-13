@@ -11,6 +11,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -19,6 +22,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.Vector;
 
 import javax.swing.JComboBox;
@@ -35,13 +39,15 @@ import net.Request;
 import net.Response;
 
 public class GUI extends JFrame implements KeyListener {
-
-	public static final String WINDOW_TITLE = "hjärna";
-	public static final int WINDOW_WIDTH = 800;
-	public static final int WINDOW_HEIGHT = 150;
+	
+	public static final String CONFIG_PROPERTIES = "/gui.properties";
 
 	private static final long serialVersionUID = -6306066100675358193L;
 
+	private String windowTitle = "hjärna";
+	private int windowWidth = 800;
+	private int windowHeight = 150;
+	
 	private Socket socket;
 	private ObjectOutputStream requestStream;
 	private ObjectInputStream responseStream;
@@ -50,8 +56,10 @@ public class GUI extends JFrame implements KeyListener {
 	private JTextField searchQuery;
 	private JComboBox<Object> searchPool;
 	private JList<Entry> resultBox;
+	
+	private Properties properties;
 
-	public GUI() throws UnknownHostException, IOException {
+	public GUI() throws UnknownHostException, IOException {		
 		socket = new Socket(Server.host, Server.port);
 		requestStream = new ObjectOutputStream(socket.getOutputStream());
 		responseStream = new ObjectInputStream(socket.getInputStream());
@@ -61,12 +69,14 @@ public class GUI extends JFrame implements KeyListener {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 		}
-
+		
+		loadProperties();
+		
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 
-		setTitle(WINDOW_TITLE);
-		setBounds(screen.width / 2 - WINDOW_WIDTH / 2, screen.height / 2 - WINDOW_HEIGHT / 2, WINDOW_WIDTH,
-				WINDOW_HEIGHT);
+		setTitle(windowTitle);
+		setBounds(screen.width / 2 - windowWidth / 2, screen.height / 2 - windowHeight / 2, windowWidth,
+				windowHeight);
 		setLayout(new BorderLayout());
 		addWindowListener(new WindowAdapter() {
 			@Override
@@ -91,7 +101,47 @@ public class GUI extends JFrame implements KeyListener {
 			}
 		});
 	}
-
+	
+	private void loadProperties() {
+		String fpath = Control.getConfigPath() + CONFIG_PROPERTIES;
+		File propFile = new File(fpath);
+		String prop;
+		
+		properties = new Properties();
+		
+		if (!propFile.isFile()) {
+			properties.setProperty("width", "" + windowWidth);
+			properties.setProperty("height", "" + windowHeight);
+			properties.setProperty("title", windowTitle);
+			
+			try (FileOutputStream fout = new FileOutputStream(propFile)) {
+				properties.store(fout, null);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return;
+		}
+		
+		try (FileInputStream fstream = new FileInputStream(fpath)) {
+			properties.load(fstream);
+			
+			if ((prop = properties.getProperty("width")) != null) {
+				windowWidth = Integer.parseInt(prop);
+			}
+			
+			if ((prop = properties.getProperty("height")) != null) {
+				windowHeight = Integer.parseInt(prop);
+			}
+			
+			if ((prop = properties.getProperty("title")) != null) {
+				windowTitle = prop;
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private void initializePanel() {
 		JPanel searchBox = new JPanel();
 		searchBox.setLayout(new GridBagLayout());
