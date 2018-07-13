@@ -56,11 +56,12 @@ public class GUI extends JFrame implements KeyListener {
 		requestStream = new ObjectOutputStream(socket.getOutputStream());
 		responseStream = new ObjectInputStream(socket.getInputStream());
 		poolList = getPools();
-		
+
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (Exception e) {}
-		
+		} catch (Exception e) {
+		}
+
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 
 		setTitle(WINDOW_TITLE);
@@ -128,7 +129,7 @@ public class GUI extends JFrame implements KeyListener {
 
 		JScrollPane scrollPane = new JScrollPane(resultBox);
 		scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		
+
 		add(searchBox, BorderLayout.NORTH);
 		add(scrollPane, BorderLayout.CENTER);
 	}
@@ -158,7 +159,7 @@ public class GUI extends JFrame implements KeyListener {
 	}
 
 	@Override
-	public void keyTyped(KeyEvent arg0) {
+	public void keyPressed(KeyEvent arg0) {
 		if (1 < searchQuery.getText().length()) {
 			Request request = new Request();
 			request.setQuery(searchQuery.getText());
@@ -176,9 +177,9 @@ public class GUI extends JFrame implements KeyListener {
 			}
 		}
 	}
-
+	
 	@Override
-	public void keyPressed(KeyEvent arg0) {
+	public void keyTyped(KeyEvent arg0) {
 	}
 
 	@Override
