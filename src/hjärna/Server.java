@@ -74,7 +74,7 @@ public class Server {
 		}
 	}
 
-	private List<String> search(Request request) {
+	private List<String[]> search(Request request) {
 		if (request.pool != null) {
 			return pools.get(request.pool).search(request);
 		} else {

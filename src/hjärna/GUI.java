@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JList;
@@ -140,7 +139,7 @@ public class GUI extends JFrame implements KeyListener {
 			request.setType(Request.Type.INIT);
 			send(request);
 
-			Response response = receive();
+			Response<String> response = receive();
 
 			return response.results;
 		} catch (IOException | ClassNotFoundException e) {
@@ -149,8 +148,8 @@ public class GUI extends JFrame implements KeyListener {
 		return new ArrayList<>();
 	}
 
-	private Response receive() throws ClassNotFoundException, IOException {
-		return (Response) responseStream.readObject();
+	private <T> Response<T> receive() throws ClassNotFoundException, IOException {
+		return (Response<T>) responseStream.readObject();
 	}
 
 	private void send(Request request) throws IOException {
@@ -168,7 +167,7 @@ public class GUI extends JFrame implements KeyListener {
 				send(request);
 
 				Vector<Entry> updateResults = new Vector<>();
-				for (String line : receive().results) {
+				for (String[] line : this.<String[]>receive().results) {
 					updateResults.add(new Entry(line));
 				}
 				resultBox.setListData(updateResults);

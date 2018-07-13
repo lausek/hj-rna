@@ -99,11 +99,12 @@ public class SearchPool implements Serializable {
 		}
 	}
 
-	public List<String> search(Request request) {
+	public List<String[]> search(Request request) {
 		String query = request.query.toLowerCase();
 		return content
 				.stream()
 				.filter(line -> line.toLowerCase().contains(query))
+				.map(line -> line.split(";"))
 				.collect(Collectors.toList());
 	}
 
