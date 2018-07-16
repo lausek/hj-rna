@@ -212,7 +212,7 @@ public class GUI extends JFrame implements KeyListener {
 	public void keyPressed(KeyEvent arg0) {
 		if (1 < searchQuery.getText().length()) {
 			Request request = new Request();
-			request.setQuery(searchQuery.getText());
+			request.setQuery(searchQuery.getText() + arg0.getKeyChar());
 			request.setPool((String) searchPool.getModel().getSelectedItem());
 			try {
 				send(request);
