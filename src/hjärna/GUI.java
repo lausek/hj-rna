@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.KeyEventDispatcher;
+import java.awt.KeyboardFocusManager;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -39,7 +41,7 @@ import net.Request;
 import net.Response;
 
 public class GUI extends JFrame implements KeyListener {
-	
+
 	public static final String CONFIG_PROPERTIES = "/gui.properties";
 
 	private static final long serialVersionUID = -6306066100675358193L;
@@ -47,7 +49,7 @@ public class GUI extends JFrame implements KeyListener {
 	private String windowTitle = "hjärna";
 	private int windowWidth = 800;
 	private int windowHeight = 150;
-	
+
 	private Socket socket;
 	private ObjectOutputStream requestStream;
 	private ObjectInputStream responseStream;
@@ -56,10 +58,10 @@ public class GUI extends JFrame implements KeyListener {
 	private JTextField searchQuery;
 	private JComboBox<Object> searchPool;
 	private JList<Entry> resultBox;
-	
+
 	private Properties properties;
 
-	public GUI() throws UnknownHostException, IOException {		
+	public GUI() throws UnknownHostException, IOException {
 		socket = new Socket(Server.host, Server.port);
 		requestStream = new ObjectOutputStream(socket.getOutputStream());
 		responseStream = new ObjectInputStream(socket.getInputStream());
@@ -69,14 +71,13 @@ public class GUI extends JFrame implements KeyListener {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		} catch (Exception e) {
 		}
-		
+
 		loadProperties();
-		
+
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 
 		setTitle(windowTitle);
-		setBounds(screen.width / 2 - windowWidth / 2, screen.height / 2 - windowHeight / 2, windowWidth,
-				windowHeight);
+		setBounds(screen.width / 2 - windowWidth / 2, screen.height / 2 - windowHeight / 2, windowWidth, windowHeight);
 		setLayout(new BorderLayout());
 		addWindowListener(new WindowAdapter() {
 			@Override
@@ -92,6 +93,47 @@ public class GUI extends JFrame implements KeyListener {
 
 		initializePanel();
 
+		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
+			@Override
+			public boolean dispatchKeyEvent(KeyEvent arg0) {
+				if (arg0.getID() != KeyEvent.KEY_PRESSED) {
+					return false;
+				}
+				
+				switch (arg0.getKeyCode()) {
+				// escape
+				case 27:
+					closeWindow();
+					break;
+				
+				// tab
+				case 9:
+					Component focused = getFocusOwner();
+					boolean back = (arg0.getModifiersEx() & KeyEvent.SHIFT_DOWN_MASK) != 0;
+
+					if (focused == searchPool) {
+						if (back)
+							resultBox.requestFocusInWindow();
+						else
+							searchQuery.requestFocusInWindow();
+					} else if (focused == searchQuery) {
+						if (back)
+							searchPool.requestFocusInWindow();
+						else
+							resultBox.requestFocusInWindow();
+					} else if (focused == resultBox) {
+						if (back)
+							searchQuery.requestFocusInWindow();
+						else
+							searchPool.requestFocusInWindow();
+					}
+
+					return true;
+				}
+				return false;
+			}
+		});
+
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 		SwingUtilities.invokeLater(new Runnable() {
@@ -102,18 +144,22 @@ public class GUI extends JFrame implements KeyListener {
 		});
 	}
 	
+	public void closeWindow() {
+		dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+	}
+
 	private void loadProperties() {
 		String fpath = Control.getConfigPath() + CONFIG_PROPERTIES;
 		File propFile = new File(fpath);
 		String prop;
-		
+
 		properties = new Properties();
-		
+
 		if (!propFile.isFile()) {
 			properties.setProperty("width", "" + windowWidth);
 			properties.setProperty("height", "" + windowHeight);
 			properties.setProperty("title", windowTitle);
-			
+
 			try (FileOutputStream fout = new FileOutputStream(propFile)) {
 				properties.store(fout, null);
 			} catch (IOException e) {
@@ -122,18 +168,18 @@ public class GUI extends JFrame implements KeyListener {
 			}
 			return;
 		}
-		
+
 		try (FileInputStream fstream = new FileInputStream(fpath)) {
 			properties.load(fstream);
-			
+
 			if ((prop = properties.getProperty("width")) != null) {
 				windowWidth = Integer.parseInt(prop);
 			}
-			
+
 			if ((prop = properties.getProperty("height")) != null) {
 				windowHeight = Integer.parseInt(prop);
 			}
-			
+
 			if ((prop = properties.getProperty("title")) != null) {
 				windowTitle = prop;
 			}
@@ -141,7 +187,7 @@ public class GUI extends JFrame implements KeyListener {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void initializePanel() {
 		JPanel searchBox = new JPanel();
 		searchBox.setLayout(new GridBagLayout());
@@ -227,7 +273,7 @@ public class GUI extends JFrame implements KeyListener {
 			}
 		}
 	}
-	
+
 	@Override
 	public void keyTyped(KeyEvent arg0) {
 	}
